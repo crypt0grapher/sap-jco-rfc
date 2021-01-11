@@ -27,10 +27,12 @@ If you got a response like ```bash: java: command not found```, then install JDK
 
 #### SAP Java Connector 
 Check SAP Jco installation
-`[root]# java -classpath $CLASSPATH  -Djava.library.path=$LD_LIBRARY_PATH com.sap.conn.jco.rt.About -stdout | less`
-Here it's assumed that `$CLASSPATH` points to the `sapjco3.jar` and `$LD_LIBRARY_PATH` to SAP JCo directory, scroll down to the bottom of this section for details.
-The correct output should start like this:
+```bash
+[root]# java -classpath $CLASSPATH  -Djava.library.path=$LD_LIBRARY_PATH com.sap.conn.jco.rt.About -stdout | less
 ```
+Here it's assumed that `$CLASSPATH` points to the `sapjco3.jar` and `$LD_LIBRARY_PATH` to directory containing `sapjco3.jar`, scroll down to the bottom of this section for the details.
+The correct output should start like this:
+```bash
 [root]# java -classpath $CLASSPATH  -Djava.library.path=$LD_LIBRARY_PATH com.sap.conn.jco.rt.About -stdout
 --------------------------------------------------------------------------------------
 |                                 SAP Java Connector                                 |
@@ -50,16 +52,17 @@ Library Paths:
  JCo library:         /opt/sap/lib/libsapjco3.so
 ```
 
-If JCo not installed, then you need to download SAP JCo from [SAP Download portal](https://support.sap.com/en/product/connectors/jco.html) (SAP S/C/I/D-User required). Note the bitness of your JVM and machine processor. The current version is 3.1.3, shipped as a file `sapjco31P_3-70004517.zip` containing a gzipped tar file `sapjco3-linuxx86_64-3.1.3.tgz` which is to be unzipped and contents copied to the directory of your chioce (e.g. /opt/sap/lib), further referred to as `<sapjco_install_dir>`.
-The delivery containes samples, documentation, license info and the connector itself as two library files:  `sapjco3.jar` and `libsapjco3.so` (`.sl` for HP-UX). 
+If SAP JCo is not installed, then you need to download it from [SAP Download portal](https://support.sap.com/en/product/connectors/jco.html) (SAP S/C/I/D-User required), consideing  the bitness of your JVM and machine processor. Currently, the latest version is 3.1.3, shipped as a file `sapjco31P_3-70004517.zip` containing a gzipped tar file `sapjco3-linuxx86_64-3.1.3.tgz` which is to be unzipped to the directory of your chioce (e.g. `/opt/sap/lib` as in the above output), further referred to as `<sapjco_install_dir>`.
+The delivery contains samples, documentation, license info and the connector itself as two library files:  `sapjco3.jar` and `libsapjco3.so` (`.sl` for HP-UX). 
 
-Once unarhieved and copied to the directory of your chioce (e.g. `/opt/sap/lib`), further referred to as `<sapjco_install_dir>`, set the below environmental variables or, even better, add them to your `~/.bashrc` (or `~/.zshrc`,` ~/.shrc`, `~/.kshrc`, `~/.cshrc` or whatever shell you are using), as follows:
+Once unpacked and copied to the `<sapjco_install_dir>`, set the below environmental variables or, even better, add them to your `~/.bashrc` (or `~/.zshrc`,` ~/.shrc`, `~/.kshrc`, `~/.cshrc` or whatever shell you are using), as follows:
 
-```
-echo LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<sapjco_install_dir> >> ~/.bashrc &&
-echo CLASSPATH=$CLASSPATH:<sapjco_install_dir>/sapjco3.jar >> ~/.bashrc &&
+```bash
+echo LD_LIBRARY_PATH=<sapjco_install_dir> >> ~/.bashrc &&
+echo CLASSPATH=<sapjco_install_dir>/sapjco3.jar >> ~/.bashrc &&
 source ~/.bashrc
 ```
+Please note if you have these variables set in your system (`echo $CLASSPATH` is not empty), then add `$CLASSPATH:` after = to preserve your current setup.
 
 ### Installation
 The program uses Apache Maven to manage build and import the lastest [PicoCLI](https://picocli.info) as a nice Java command-line interface, so the fastest way will be to install `maven` and `git` to clone this repo.
@@ -75,6 +78,17 @@ Build the tool
 ```
 cd sap-jco-rfc
 mvn package
+```
+It will take some time at the first time, at the end you should get something like that:
+```bash
+[INFO] Building jar: /root/sap-jco-rfc/target/sap-jco-rfc-jar-with-dependencies.jar
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 47.717 s
+[INFO] Finished at: 2021-01-11T00:20:55Z
+[INFO] ------------------------------------------------------------------------
+[root@fb70dc155d2b sap-jco-rfc]#
 ```
 Successfull build indicates creation of `target/sap-jco-rfc-jar-with-dependencies.jar`, which is ready to run as `java -cp "$CLASSPATH:./target/sap-jco-rfc-jar-with-dependencies.jar" com.company.JCo` with the desired command line parameters (see below Using section).
 
@@ -133,6 +147,13 @@ OWN_TYPE:              E
 CPIC_CONVID:           00000000
 ```
 
+You are free to specify any connection properties `jco.client.XXX` supported by SAP simply specifying them as `-pc XXX=<value>`.
+If any issues, connector the tool throws a JCoException with the meaningful response, like a below one for missing user name:
+```
+Connecting to SAP System..
+Attributes:
+com.sap.conn.jco.JCoException: (101) JCO_ERROR_CONFIGURATION: Initialization of destination SAPSystem failed: No user identity is configured
+``` 
 2. Testing FM.
 
 There's a simple FM `STFC_CHANGING` that receives an import parameter `START_VALUE` and changing parameter `COUNTER`, returns `RESULT` as a sum of `START_VALUE` and `COUNTER` and increments `COUNTER` by 1:   
@@ -176,11 +197,12 @@ Getting changed parameters:
 	name: COUNTER, type: INT, optional: false, value: 1
 ```
 3. Finally, let's pass a value and get a return.
-```
+```bash
 ~/dev/sap-jco-rfc > sapjcorfc -pc=ashost=liner.itertop.com -pc=sysnr=00 -pc=client=800 -pc=user=itertop -pc=passwd=\$RFV4rfv -pi START_VALUE=10 -pch COUNTER=5 STFC_CHANGING
 ```
  gives the following output:
 
+```
 Initializing parameter START_VALUE with 10
 Initializing parameter COUNTER with 5
 
@@ -192,6 +214,7 @@ Getting export parameters:
 Getting changed parameters:
 	name: COUNTER, type: INT, optional: false, value: 6
 ```
+
 ## Contributing to SAP JCo RFC
 You are more than welcome to contribute to the project. 
 If you'd like to, here are some ideas as an example:
