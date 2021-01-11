@@ -1,14 +1,12 @@
 # SAP JCo RFC
 ![GitHub repo size](https://img.shields.io/github/repo-size/itertop/sap-jco-rfc)
 
-SAP JCo RFC is a simple command line tool written in Java that allows you to test connection to SAP NW ABAP Application Server and call SAP RFC enabled Function Modules with with SAP Java Connector (SAP JCo).
+SAP JCo RFC is a simple command-line tool written in Java that allows you to test the connection to SAP NW ABAP Application Server and call SAP RFC enabled Function Modules with SAP Java Connector (SAP JCo).
 ## Prerequisites
 Before you begin, ensure you have met the following requirements:
-* You are running Unix-like Operating System natively or in a Docker container to follow this readme. Should work on Windows but not tested.
-* You have JDK/JRE 5, 6, 7, 8 or 11. 
+* You are running a Unix-like Operating System natively or in a Docker container to follow this readme. Should work on Windows but not tested.
+* You have JDK/JRE 5, 6, 7, 8, or 11. 
 * You have installed [SAP Java Connector 3](https://support.sap.com/en/product/connectors/jco.html).
-
-java -classpath /opt/sapbc48/server/packages/SAP/code/jars/static/sapjco3.jar -Djava.library.path=/opt/sapbc48/server/packages/SAP/code/libs com.sap.conn.jco.rt.About -stdout
 
 ## Installing SAP JCo RFC
 ### Checking prerequisites
@@ -23,7 +21,7 @@ OpenJDK 64-Bit Server VM (build 25.275-b01, mixed mode)
 ```
 The response contains `64-bit Server VM` referring to 64-bit JVM,  the output of 32-bit JVM contains `Client VM`. It's important to align the bitness of your JVM with SAP JCo.
 
-If you got a response like ```bash: java: command not found```, then install JDK of your choice, OpenJDK 8 will do (`yum install java-1.8.0-openjdk-devel` or `apt`, `apk`, `dnf`, `pacman`, `brew` or whatever package manager you are using instead of `yum`).
+If you got a response like ```bash: java: command not found```, then install JDK of your choice, OpenJDK 8 will do (`yum install java-1.8.0-openjdk-devel` or `apt`, `apk`, `dnf`, `pacman`, `brew`, or whatever package manager you are using instead of `yum`).
 
 #### SAP Java Connector 
 Check SAP Jco installation
@@ -52,8 +50,8 @@ Library Paths:
  JCo library:         /opt/sap/lib/libsapjco3.so
 ```
 
-If SAP JCo is not installed, then you need to download it from [SAP Download portal](https://support.sap.com/en/product/connectors/jco.html) (SAP S/C/I/D-User required), consideing  the bitness of your JVM and machine processor. Currently, the latest version is 3.1.3, shipped as a file `sapjco31P_3-70004517.zip` containing a gzipped tar file `sapjco3-linuxx86_64-3.1.3.tgz` which is to be unzipped to the directory of your chioce (e.g. `/opt/sap/lib` as in the above output), further referred to as `<sapjco_install_dir>`.
-The delivery contains samples, documentation, license info and the connector itself as two library files:  `sapjco3.jar` and `libsapjco3.so` (`.sl` for HP-UX). 
+If SAP JCo is not installed, then you need to download it from the [SAP Download portal](https://support.sap.com/en/product/connectors/jco.html) (SAP S/C/I/D-User required), considering  the bitness of your JVM and machine OS/processor. at the moment of writing this readme, the latest version is 3.1.3, which is shipped for Linux as a file `sapjco31P_3-70004517.zip` containing a gzipped tar archive `sapjco3-linuxx86_64-3.1.3.tgz` which is to be unpacked with `tar zxvf sapjco3-linuxx86_64-3.1.3.tgz` to the directory of your choice (e.g. `/opt/sap/lib` in the above output), further referred to as `<sapjco_install_dir>`.
+The SAP JCo delivery contains samples, documentation, license info, and the connector itself as two library files:  `sapjco3.jar` and `libsapjco3.so` (`.sl` for HP-UX, `.dylib` on macOS). 
 
 Once unpacked and copied to the `<sapjco_install_dir>`, set the below environmental variables or, even better, add them to your `~/.bashrc` (or `~/.zshrc`,` ~/.shrc`, `~/.kshrc`, `~/.cshrc` or whatever shell you are using), as follows:
 
@@ -65,7 +63,7 @@ source ~/.bashrc
 Please note if you have these variables set in your system (`echo $CLASSPATH` is not empty), then add `$CLASSPATH:` after = to preserve your current setup.
 
 ### Installation
-The program uses Apache Maven to manage build and import the lastest [PicoCLI](https://picocli.info) as a nice Java command-line interface, so the fastest way will be to install `maven` and `git` to clone this repo.
+The program uses Apache Maven to manage the build and import the latest [PicoCLI](https://picocli.info) as a nice Java command-line interface, so the fastest way will be to install `git` to clone this repo and `maven` to build it.
 ```
 yum install -y maven git-all
 ```
@@ -74,13 +72,13 @@ Download the repo.
 ```
 git clone git://github.com/itertop/sap-jco-rfc.git
 ```
-Build the tool
+Build the project.
 ```
 cd sap-jco-rfc
 mvn package
 ```
-It will take some time at the first time, at the end you should get something like that:
-```bash
+It will take a while for the first run, as a result you should get a successfully built `target/sap-jco-rfc-jar-with-dependencies.jar`:
+```maven
 [INFO] Building jar: /root/sap-jco-rfc/target/sap-jco-rfc-jar-with-dependencies.jar
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
@@ -88,20 +86,23 @@ It will take some time at the first time, at the end you should get something li
 [INFO] Total time: 47.717 s
 [INFO] Finished at: 2021-01-11T00:20:55Z
 [INFO] ------------------------------------------------------------------------
-[root@fb70dc155d2b sap-jco-rfc]#
 ```
-Successfull build indicates creation of `target/sap-jco-rfc-jar-with-dependencies.jar`, which is ready to run as `java -cp "$CLASSPATH:./target/sap-jco-rfc-jar-with-dependencies.jar" com.company.JCo` with the desired command line parameters (see below Using section).
+The executable is ready to run with the desired command line parameters (see Using SAP JCo RFC below).
 
-To make a command line shorter, create an alias in your `~/.bashrc`:
+```bash
+java -cp "$CLASSPATH:./target/sap-jco-rfc-jar-with-dependencies.jar" com.company.JCo
 ```
+
+To make a command line more friendly, create an alias in your `~/.bashrc`:
+```bash
 alias sapjcorfc='java -cp "$CLASSPATH:/path/to/sap-jco-rfc-jar-with-dependencies.jar" com.company.JCo'
 ```
 
 ## Using SAP JCo RFC
 The program has three working modes:
 1. Connection test: specify only connection parameters with `sapjcorfc -pc <connection_credentials>`.
-2. Testing existence of a remote function module on SAP side and get the list of its parameters: specify `sapjcorfc -pc <connection_credentials> <rfc_module>`.
-3. Calling remote FM with parameters (note that tables and structures are not supported): specify `sapjcorfc -pc <connection_credentials> -pi <import_parameters> -pch <changing_parameters> <rfc_module>`.
+2. Testing existence of a remote Function Module on SAP side and getting the list of its parameters: specify `sapjcorfc -pc <connection_credentials> <rfc_module>`.
+3. Calling remote FM with import/changing parameters (note that tables and structures are not supported): specify `sapjcorfc -pc <connection_credentials> -pi <import_parameters> -pch <changing_parameters> <rfc_module>`.
 
 For example:
 1. Connection test.
@@ -147,8 +148,8 @@ OWN_TYPE:              E
 CPIC_CONVID:           00000000
 ```
 
-You are free to specify any connection properties `jco.client.XXX` supported by SAP simply specifying them as `-pc XXX=<value>`.
-If any issues, connector the tool throws a JCoException with the meaningful response, like a below one for missing user name:
+You are free to specify [any number and type of connection properties `jco.client.XXX` supported by SAP](jco.client_properties.md) just listing them as `-pc XXX=<value>`.
+If any issues, the tool throws a JCoException with the meaningful response, like the below one for missing user name:
 ```
 Connecting to SAP System..
 Attributes:
@@ -173,11 +174,12 @@ RESULT = START_VALUE + COUNTER.
 COUNTER = COUNTER + 1.
 ENDFUNCTION.
 ```
-Let's try to examine it with our tool:
+Let's try to examine the FM with our tool:
 ```
 sapjcorfc -pc=ashost=liner.itertop.com -pc=sysnr=00 -pc=client=800 -pc=user=itertop -pc=passwd=\$RFV4rfv STFC_CHANGING
 ```
-gives the following output:
+The tool inspects the module and the following output shows its input, changing, and result parameters:
+
 ```
 Checking FM 'STFC_CHANGING'..
 Module found in the remote system.
@@ -200,8 +202,7 @@ Getting changed parameters:
 ```bash
 ~/dev/sap-jco-rfc > sapjcorfc -pc=ashost=liner.itertop.com -pc=sysnr=00 -pc=client=800 -pc=user=itertop -pc=passwd=\$RFV4rfv -pi START_VALUE=10 -pch COUNTER=5 STFC_CHANGING
 ```
- gives the following output:
-
+The program calls FM in SAP which adds 10 to 5 and returns 15 to as, and also increments 5 by 1. 
 ```
 Initializing parameter START_VALUE with 10
 Initializing parameter COUNTER with 5
@@ -215,6 +216,8 @@ Getting changed parameters:
 	name: COUNTER, type: INT, optional: false, value: 6
 ```
 
+The program creates a file `SAPSystem.jcodestination` in the working directory with the latest connection info (password is hashed).
+
 ## Contributing to SAP JCo RFC
 You are more than welcome to contribute to the project. 
 If you'd like to, here are some ideas as an example:
@@ -227,14 +230,10 @@ To contribute to SAP JCo RFC, follow these steps:
 1. Fork this repository.
 2. Create a branch: `git checkout -b <branch_name>`.
 3. Make your changes and commit them: `git commit -m '<commit_message>'`
-4. Push to the original branch: `git push origin <project_name>/<location>`
+4. Push to the original branch: `git push origin sap-jco-rfc/<location>`
 5. Create the pull request.
 
 Alternatively see the GitHub documentation on [creating a pull request](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request).
 
 ## Contact
 If you want to contact me you can reach me at <alex@itertop.com>.
-
-Files created:
-dev_jco_rfc.log
-SAPSystem.JCO destination
