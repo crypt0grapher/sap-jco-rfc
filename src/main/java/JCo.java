@@ -16,7 +16,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.concurrent.Callable;
 
-@Command(name = "sapjcorfc", mixinStandardHelpOptions = true, version = "sapjcorfc 0.1",
+@Command(name = "sapjcorfc", showAtFileInUsageHelp = true, mixinStandardHelpOptions = true, version = "sapjcorfc 0.1",
         description = "Connects to SAP NW ABAP AS with JCo and calls an RFC enabled FM.\n\n" +
                 "The program has three working modes:\n" +
                 "1. Connection test: specify only connection parameters with -pc <connection_credentials>.\n" +

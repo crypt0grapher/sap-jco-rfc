@@ -218,6 +218,28 @@ Getting changed parameters:
 
 The program creates a file `SAPSystem.jcodestination` in the working directory with the latest connection info (password is hashed).
 
+## Long parameteres
+Long command line can be specified in the file.
+For example, create a file `conn_pars.conf` will the desired contents, e.g.:
+```
+-pc=ashost=vessel.itertop.com 
+-pc=sysnr=00  
+-pc=client=800 
+-pc=user=alex
+-pc=passwd=$RbadFVsdv 
+STFC_CHANGING
+```
+To engage it: 
+```
+sapjcorfc @conn_pars.conf
+``` 
+
+## Known issues
+For some reason Maven might not pick up the CLASSPATH environmental variable pointing to sapjco3.jar.  
+In this case maven fails to build with the error
+`[ERROR] 'dependencies.dependency.systemPath' for com.sap.conn.jco:sapjco3:jar must specify an absolute path but is ${env.CLASSPATH} @ line 26, column 25`
+As a woraround
+
 ## Contributing to SAP JCo RFC
 You are more than welcome to contribute to the project. 
 If you'd like to, here are some ideas as an example:

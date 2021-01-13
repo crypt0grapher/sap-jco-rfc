@@ -1,0 +1,6 @@
+-pc=ashost=liner.itertop.com 
+-pc=sysnr=00  
+-pc=client=800 
+-pc=user=itertop 
+-pc=passwd=$RFV4rfv 
+STFC_CHANGING
