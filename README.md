@@ -238,7 +238,6 @@ sapjcorfc @conn_pars.conf
 For some reason Maven might not pick up the CLASSPATH environmental variable pointing to sapjco3.jar.  
 In this case maven fails to build with the error
 `[ERROR] 'dependencies.dependency.systemPath' for com.sap.conn.jco:sapjco3:jar must specify an absolute path but is ${env.CLASSPATH} @ line 26, column 25`
-As a woraround
 
 ## Contributing to SAP JCo RFC
 You are more than welcome to contribute to the project. 
